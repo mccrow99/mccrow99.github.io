@@ -103,9 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let url;
             if (number === "all") {
-                url = `/api/v1/jokes/${encodeURIComponent(language)}/${encodeURIComponent(category)}/all`;
+                url = `https://my-ip-class.onrender.com/api/v1/jokes/${encodeURIComponent(language)}/${encodeURIComponent(category)}/all`;
             } else {
-                url = `/api/v1/jokes/${encodeURIComponent(language)}/${encodeURIComponent(category)}/${encodeURIComponent(number)}`;
+                url = `https://my-ip-class.onrender.com/api/v1/jokes/${encodeURIComponent(language)}/${encodeURIComponent(category)}/${encodeURIComponent(number)}`;
             }
 
             jokesContainer.innerHTML = "<p>Loading…</p>";
