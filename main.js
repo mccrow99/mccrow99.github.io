@@ -41,17 +41,29 @@ function createNumberOptions(max = 10)
 function renderJokes(container, jokes) 
 {
     container.innerHTML = "";
-    if (!Array.isArray(jokes)) return;
+    if (!Array.isArray(jokes)) 
+    {return;}
+    
+    if (jokes.length === 0) {
+        const box = document.createElement("article");
+        box.className = "box";
+
+        const p = document.createElement("p");
+        p.textContent = "There are no jokes in the chosen combination of languages and categories";
+        
+        box.appendChild(p);
+        container.appendChild(box);
+        return;
+    }
+
     jokes.forEach((j) => {
         const box = document.createElement("article");
         box.className = "box mb-3";
+        
         const p = document.createElement("p");
         p.textContent = j.text || j;
+
         box.appendChild(p);
-        const meta = document.createElement("p");
-        meta.className = "is-size-7 has-text-grey";
-        meta.textContent = `${j.language || ""} — ${j.category || ""}`;
-        box.appendChild(meta);
         container.appendChild(box);
     });
 }
@@ -59,16 +71,16 @@ function renderJokes(container, jokes)
 function renderSingle(container, joke) 
 {
     container.innerHTML = "";
-    if (!joke) return;
+    if (!joke) 
+    {return};
+
     const box = document.createElement("article");
     box.className = "box";
+
     const p = document.createElement("p");
     p.textContent = joke.text || joke;
     box.appendChild(p);
-    const meta = document.createElement("p");
-    meta.className = "is-size-7 has-text-grey";
-    meta.textContent = `${joke.language || ""} — ${joke.category || ""}`;
-    box.appendChild(meta);
+    
     container.appendChild(box);
 }
 
@@ -78,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selNum = document.getElementById("selNum");
     const jokeId = document.getElementById("jokeId");
     const jokesContainer = document.getElementById("jokes");
-    const form = document.querySelector("#form-container form") || document.querySelector("form");
+    const btnAmuse = document.getElementById("btnAmuse");
 
     if (selLang) {
         populateSelect(
@@ -93,16 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
         populateSelect(selNum, createNumberOptions(10), "value", "text");
     }
 
-    if (form) {
-        form.addEventListener("submit", async (ev) => {
+    if (btnAmuse) {
+        btnAmuse.addEventListener("click", async (ev) => {
             ev.preventDefault();
             const language = selLang ? selLang.value : "any";
             const category = selCat ? selCat.value : "any";
             const number = selNum ? selNum.value : "all";
-            const JID = jokeId.value;
+            const JID = jokeId ? jokeId.value.trim() : "";
 
             let url;
-            if (number === "all") {
+            
+            if (JID) {
+                url = `https://my-ip-class.onrender.com/api/v1/jokes/${encodeURIComponent(JID)}`;
+            } else if (number === "all") {
                 url = `https://my-ip-class.onrender.com/api/v1/jokes/${encodeURIComponent(language)}/${encodeURIComponent(category)}/all`;
             } else {
                 url = `https://my-ip-class.onrender.com/api/v1/jokes/${encodeURIComponent(language)}/${encodeURIComponent(category)}/${encodeURIComponent(number)}`;
@@ -114,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const resp = await fetch(url, { cache: "no-store" });
                 if (!resp.ok) {
                     const txt = await resp.text();
-                    jokesContainer.innerHTML = `<div class=\"box has-text-danger\">Error ${resp.status}: ${txt}</div>`;
+                    jokesContainer.innerHTML = `<article class=\"box has-text-danger\">404 Not Found: Joke ${JID} not found, try an id between 0 and 952</article>`;
                     return;
                 }
 
@@ -123,11 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     renderJokes(jokesContainer, body.jokes);
                 } else if (body.joke) {
                     renderSingle(jokesContainer, body.joke);
-                } else {
-                    jokesContainer.innerHTML = "<div class=\"box\">No jokes returned</div>";
                 }
             } catch (err) {
-                jokesContainer.innerHTML = `<div class=\"box has-text-danger\">Network error: ${err.message}</div>`;
+                jokesContainer.innerHTML = `<article class=\"box has-text-danger\">Network error: ${err.message}</article>`;
             }
         });
     }
