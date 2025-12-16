@@ -1,14 +1,22 @@
 "use strict";
 
 class Concert {
-    constructor(id, title, subtitle = '', location = '', dates = []) {
+    constructor(id, title, subtitle = '', description = '', director = null, performances = [], songs = [], ensembles = [], crew_members = [], acknowledgments = [], bios = []) {
         this.id = id;
         this.title = title;
         this.subtitle = subtitle;
-        this.location = location;
-        this.dates = dates;
+        this.description = description;
+        this.director = director;
+        this.performances = performances;
+        this.songs = songs;
+        this.ensembles = ensembles;
+        this.crew_members = crew_members;
+        this.acknowledgments = acknowledgments;
+        this.bios = bios;
     }
 }
+
+const base_url = "https://kulbee.pythonanywhere.com";
 
 function displayConcerts(container, concerts) {
     container.innerHTML = "";
@@ -76,20 +84,23 @@ function displayConcerts(container, concerts) {
             content.appendChild(subtitle);
         }
 
-        if (concert.location) {
-            const locationDiv = document.createElement("div");
-            locationDiv.className = "mb-2";
-            locationDiv.innerHTML = `<span class="icon-text"><span class="icon has-text-info"><i class="fas fa-map-marker-alt"></i></span><span>${concert.location}</span></span>`;
-            content.appendChild(locationDiv);
-        }
+        // Display performance info if available
+        if (concert.performances && concert.performances.length > 0) {
+            const firstPerf = concert.performances[0];
+            if (firstPerf.location) {
+                const locationDiv = document.createElement("div");
+                locationDiv.className = "mb-2";
+                locationDiv.innerHTML = `<span class="icon-text"><span class="icon has-text-info"><i class="fas fa-map-marker-alt"></i></span><span>${firstPerf.location}</span></span>`;
+                content.appendChild(locationDiv);
+            }
 
-        if (concert.dates && concert.dates.length > 0) {
             const datesDiv = document.createElement("div");
             datesDiv.className = "mb-2";
-            const datesList = concert.dates.slice(0, 3).join(", ");
+            const dates = concert.performances.map(p => formatDate(p.date)).slice(0, 3);
+            const datesList = dates.join(", ");
             datesDiv.innerHTML = `<span class="icon-text"><span class="icon has-text-success"><i class="fas fa-calendar"></i></span><span>${datesList}</span></span>`;
-            if (concert.dates.length > 3) {
-                datesDiv.innerHTML += ` <span class="tag is-light">+${concert.dates.length - 3} more</span>`;
+            if (concert.performances.length > 3) {
+                datesDiv.innerHTML += ` <span class="tag is-light">+${concert.performances.length - 3} more</span>`;
             }
             content.appendChild(datesDiv);
         }
@@ -129,21 +140,34 @@ function displayConcerts(container, concerts) {
     });
 }
 
-function deleteConcert(concertId) {
-    // TODO: Make API call to delete concert
-    console.log(`Deleting concert with ID: ${concertId}`);
-    
-    // For now, just reload the page
-    // In production, this would make an API call then refresh the list
-    showNotification("Concert deleted successfully", "success");
-    
-    // Simulate reload after short delay
-    setTimeout(() => {
-        loadConcerts();
-    }, 1000);
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
 }
 
-function showNotification(message, type = "info") {
+async function deleteConcert(concertId) {
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/delete`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete concert');
+        }
+
+        showNotification("Concert deleted successfully", "success");
+        
+        setTimeout(() => {
+            loadConcerts();
+        }, 1000);
+    } catch (error) {
+        console.error('Error deleting concert:', error);
+        showNotification("Error deleting concert: " + error.message, "danger");
+    }
+}
+
+function showNotification(message, type = "info", duration = 4000) {
     const container = document.querySelector(".container");
     const notification = document.createElement("div");
     notification.className = `notification is-${type} is-light`;
@@ -152,33 +176,65 @@ function showNotification(message, type = "info") {
         ${message}
     `;
     
+    notification.style.opacity = "0";
+    notification.style.transition = "opacity 0.3s ease";
+    
     container.insertBefore(notification, container.firstChild);
     
+    setTimeout(() => notification.style.opacity = "1", 10);
+    
     notification.querySelector(".delete").addEventListener("click", () => {
-        notification.remove();
+        removeNotification(notification);
     });
     
+    setTimeout(() => removeNotification(notification), duration);
+}
+
+function removeNotification(notification) {
+    notification.style.opacity = "0";
     setTimeout(() => {
-        notification.style.opacity = "0";
-        notification.style.transition = "opacity 0.3s";
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 300);
 }
 
 async function loadConcerts() {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/concerts');
-    // const concerts = await response.json();
-    
-    // Mock data for demonstration
-    const mockConcerts = [
-        new Concert(1, "Winter Gala Concert", "An Evening of Classical Favorites", "Grand Concert Hall", ["December 20, 2025", "December 21, 2025"]),
-        new Concert(2, "Spring Symphony", "Celebrating the Season", "City Auditorium", ["March 15, 2026"]),
-        new Concert(3, "Chamber Music Series", "", "University Theater", ["January 10, 2026", "February 14, 2026", "March 21, 2026", "April 18, 2026"])
-    ];
-    
     const container = document.getElementById("concerts-container");
-    displayConcerts(container, mockConcerts);
+    
+    try {
+        const response = await fetch(`${base_url}/api/concerts`, {method: "GET", cache: "no-store" });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load concerts');
+        }
+        
+        const concert_data = await response.json();
+
+        const concerts = concert_data.map(c => new Concert(
+            c.id,
+            c.title,
+            c.subtitle,
+            c.description,
+            c.director,
+            c.performances || [],
+            c.songs || [],
+            c.ensembles || [],
+            c.crew_members || [],
+            c.acknowledgments || [],
+            c.bios || []
+        ));
+        
+        displayConcerts(container, concerts);
+    } catch (error) {
+        console.error('Error loading concerts:', error);
+        container.innerHTML = `
+            <div class="notification is-danger is-light">
+                <p>Error loading concerts: ${error.message}</p>
+                <button class="button is-small mt-3" onclick="loadConcerts()">Retry</button>
+            </div>
+        `;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

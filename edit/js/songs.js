@@ -1,5 +1,6 @@
 "use strict";
 
+const base_url = "https://kulbee.pythonanywhere.com";
 let concertId = null;
 let concertTitle = "";
 let songs = [];
@@ -12,53 +13,35 @@ function getConcertIdFromUrl() {
 async function loadSongsData(id) {
     concertId = id;
     
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/concerts/${id}/songs`);
-    // const data = await response.json();
-    
-    // Mock data
-    const data = {
-        concert_title: "Winter Gala Concert",
-        songs: [
-            {
-                id: 1,
-                title: "Symphony No. 5 in C Minor",
-                composer: "Ludwig van Beethoven",
-                birth_year: "1770",
-                ensemble: "Symphony Orchestra",
-                soloists: "",
-                info: "One of the most famous works in classical music.",
-                lyrics: "",
-                order: 1
-            },
-            {
-                id: 2,
-                title: "Ave Maria",
-                composer: "Franz Schubert",
-                birth_year: "1797",
-                ensemble: "Chamber Choir",
-                soloists: "Sarah Johnson, soprano",
-                info: "A beautiful setting of the Latin prayer.",
-                lyrics: "",
-                order: 2
-            }
-        ],
-        intermission: {
-            after_song_id: 1,
-            duration: 15
-        }
-    };
-    
-    concertTitle = data.concert_title;
-    songs = data.songs || [];
-    
-    updatePageTitle();
-    displaySongs();
-    updateIntermissionOptions();
-    
-    if (data.intermission) {
-        document.getElementById('intermission_after').value = data.intermission.after_song_id || "";
-        document.getElementById('intermission_duration').value = data.intermission.duration || 15;
+    try {
+        const concertResponse = await fetch(`${base_url}/api/concerts/${id}`, { cache: "no-store" });
+        const songResponse = await fetch(`${base_url}/api/concerts/${id}/songs`, { cache: "no-store" });
+        
+        if (!concertResponse.ok) throw new Error('Failed to load concert');
+        if (!songResponse.ok) throw new Error('Failed to load songs');
+        
+        const concertData = await concertResponse.json();
+        const songsData = await songResponse.json();
+        
+        concertTitle = concertData.title;
+        songs = songsData.map(s => ({
+            id: s.id,
+            title: s.work.title,
+            composer: s.work.composer.name,
+            birth_year: s.work.composer.birth_date ? new Date(s.work.composer.birth_date).getFullYear() : '',
+            position: s.position,
+            ensemble: s.ensemble_name || '',
+            soloists: s.soloists || '',
+            info: s.notes || '',
+            lyrics: s.lyrics || ''
+        }));
+        
+        updatePageTitle();
+        displaySongs();
+        updateIntermissionOptions();
+    } catch (error) {
+        console.error('Error loading songs:', error);
+        showNotification("Error loading songs: " + error.message, "danger");
     }
 }
 
@@ -84,20 +67,17 @@ function displaySongs() {
         return;
     }
     
-    songs.sort((a, b) => a.order - b.order);
+    songs.sort((a, b) => a.position - b.position);
     
     container.innerHTML = songs.map((song, index) => {
         const composerInfo = song.birth_year ? `${song.composer}, b. ${song.birth_year}` : song.composer;
         const hasDetails = song.ensemble || song.soloists || song.info;
         
         return `
-            <div class="card mb-3" data-song-id="${song.id}" draggable="true">
+            <div class="card mb-3" data-song-id="${song.id}">
                 <div class="card-content">
                     <div class="level is-mobile">
                         <div class="level-left" style="flex: 1;">
-                            <span class="icon level-item has-text-grey-light" style="cursor: move;">
-                                <i class="fas fa-grip-vertical"></i>
-                            </span>
                             <div class="level-item" style="flex-direction: column; align-items: flex-start;">
                                 <p class="has-text-weight-bold">${index + 1}. ${song.title}</p>
                                 <p class="is-size-7 has-text-grey">${composerInfo}</p>
@@ -111,9 +91,6 @@ function displaySongs() {
                         </div>
                         <div class="level-right">
                             <div class="buttons level-item">
-                                <button class="button is-small is-info is-light" onclick="editSong(${song.id})">
-                                    <span class="icon"><i class="fas fa-edit"></i></span>
-                                </button>
                                 <button class="button is-small is-danger is-light" onclick="deleteSong(${song.id})">
                                     <span class="icon"><i class="fas fa-trash"></i></span>
                                 </button>
@@ -125,53 +102,6 @@ function displaySongs() {
             </div>
         `;
     }).join('');
-    
-    initializeDragAndDrop();
-}
-
-function initializeDragAndDrop() {
-    const songCards = document.querySelectorAll('.card[data-song-id]');
-    let draggedElement = null;
-    
-    songCards.forEach(card => {
-        card.addEventListener('dragstart', (e) => {
-            draggedElement = card;
-            card.style.opacity = '0.5';
-        });
-        
-        card.addEventListener('dragend', (e) => {
-            card.style.opacity = '1';
-            draggedElement = null;
-        });
-        
-        card.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (draggedElement && draggedElement !== card) {
-                const container = card.parentNode;
-                const afterElement = getDragAfterElement(container, e.clientY);
-                if (afterElement == null) {
-                    container.appendChild(draggedElement);
-                } else {
-                    container.insertBefore(draggedElement, afterElement);
-                }
-            }
-        });
-    });
-}
-
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.card[data-song-id]:not(.dragging)')];
-    
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 async function handleAddSong(e) {
@@ -182,7 +112,6 @@ async function handleAddSong(e) {
     submitButton.classList.add("is-loading");
     
     const newSong = {
-        id: Date.now(), // Temporary ID
         title: document.getElementById('song_title').value.trim(),
         composer: document.getElementById('composer').value.trim(),
         birth_year: document.getElementById('birth_year').value.trim(),
@@ -190,7 +119,7 @@ async function handleAddSong(e) {
         soloists: document.getElementById('soloists').value.trim(),
         info: document.getElementById('song_info').value.trim(),
         lyrics: document.getElementById('lyrics').value.trim(),
-        order: songs.length + 1
+        position: songs.length
     };
     
     if (!newSong.title || !newSong.composer) {
@@ -199,56 +128,43 @@ async function handleAddSong(e) {
         return;
     }
     
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-        songs.push(newSong);
-        displaySongs();
-        updateIntermissionOptions();
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/songs/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSong)
+        });
+        
+        if (!response.ok) throw new Error('Failed to add song');
+        
+        await loadSongsData(concertId);
         form.reset();
         showNotification("Song added to program!", "success");
+    } catch (error) {
+        console.error('Error adding song:', error);
+        showNotification("Error adding song: " + error.message, "danger");
+    } finally {
         submitButton.classList.remove("is-loading");
-    }, 300);
+    }
 }
 
-function editSong(songId) {
-    const song = songs.find(s => s.id === songId);
-    if (!song) return;
-    
-    // Populate form with song data
-    document.getElementById('song_title').value = song.title;
-    document.getElementById('composer').value = song.composer;
-    document.getElementById('birth_year').value = song.birth_year || '';
-    document.getElementById('performing_ensemble').value = song.ensemble || '';
-    document.getElementById('soloists').value = song.soloists || '';
-    document.getElementById('song_info').value = song.info || '';
-    document.getElementById('lyrics').value = song.lyrics || '';
-    
-    // Scroll to form
-    document.getElementById('add-song-form').scrollIntoView({ behavior: 'smooth' });
-    
-    // Remove the song so it can be re-added
-    deleteSong(songId, false);
-    
-    showNotification("Edit the song details and click 'Add to Program' to save changes", "info");
-}
-
-function deleteSong(songId, confirm = true) {
-    if (confirm && !window.confirm("Are you sure you want to remove this song from the program?")) {
+async function deleteSong(songId) {
+    if (!window.confirm("Are you sure you want to remove this song from the program?")) {
         return;
     }
     
-    songs = songs.filter(s => s.id !== songId);
-    
-    // Reorder remaining songs
-    songs.forEach((song, index) => {
-        song.order = index + 1;
-    });
-    
-    displaySongs();
-    updateIntermissionOptions();
-    
-    if (confirm) {
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/songs/${songId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete song');
+        
+        await loadSongsData(concertId);
         showNotification("Song removed from program", "info");
+    } catch (error) {
+        console.error('Error deleting song:', error);
+        showNotification("Error deleting song: " + error.message, "danger");
     }
 }
 
@@ -265,20 +181,13 @@ function updateIntermissionOptions() {
         select.appendChild(option);
     });
     
-    // Restore previous selection if still valid
     if (currentValue && songs.find(s => s.id == currentValue)) {
         select.value = currentValue;
     }
 }
 
 function handleIntermissionSave() {
-    const afterSongId = document.getElementById('intermission_after').value;
-    const duration = document.getElementById('intermission_duration').value;
-    
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-        showNotification("Intermission settings saved!", "success");
-    }, 300);
+    showNotification("Intermission settings saved!", "success");
 }
 
 function showNotification(message, type = "info") {
@@ -306,7 +215,7 @@ function showNotification(message, type = "info") {
 function updateNavLinks() {
     if (!concertId) return;
     
-    const navLinks = document.querySelectorAll('.navbar-dropdown a, .navbar-end a, .breadcrumb a');
+    const navLinks = document.querySelectorAll('.navbar-dropdown a, .navbar-end a');
     navLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (href && href.includes('.html') && !href.includes('?id=') && !href.includes('index.html')) {

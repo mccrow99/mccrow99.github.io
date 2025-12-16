@@ -5,6 +5,8 @@ let concertTitle = "";
 let ensembles = [];
 let currentEnsemble = null;
 
+const base_url = "https://kulbee.pythonanywhere.com";
+
 function getConcertIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
     return params.get('id');
@@ -13,39 +15,36 @@ function getConcertIdFromUrl() {
 async function loadEnsemblesData(id) {
     concertId = id;
     
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/concerts/${id}/ensembles`);
-    // const data = await response.json();
-    
-    // Mock data
-    const data = {
-        concert_title: "Winter Gala Concert",
-        ensembles: [
-            {
-                id: 1,
-                name: "Symphony Orchestra",
-                type: "sectioned",
-                sections: [
-                    { name: "Violin I", members: ["Alice Smith", "Bob Jones", "Carol White"] },
-                    { name: "Violin II", members: ["David Brown", "Emma Davis"] },
-                    { name: "Viola", members: ["Frank Miller"] },
-                    { name: "Cello", members: ["Grace Wilson", "Henry Moore"] }
-                ]
-            },
-            {
-                id: 2,
-                name: "Chamber Choir",
-                type: "simple",
-                members: ["Jane Doe", "John Smith", "Mary Johnson", "Tom Wilson"]
-            }
-        ]
-    };
-    
-    concertTitle = data.concert_title;
-    ensembles = data.ensembles || [];
-    
-    updatePageTitle();
-    displayEnsembles();
+    try {
+        // Load concert info
+        const concertResponse = await fetch(`${base_url}/api/concerts/${id}`, { method: "GET", cache: "no-store" });
+        if (!concertResponse.ok) {
+            throw new Error('Concert not found');
+        }
+        const concertData = await concertResponse.json();
+        concertTitle = concertData.title;
+        
+        // Load ensembles
+        const ensemblesResponse = await fetch(`${base_url}/api/concerts/${id}/ensembles`, { method: "GET", cache: "no-store" });
+        if (!ensemblesResponse.ok) {
+            throw new Error('Failed to load ensembles');
+        }
+        const ensemblesData = await ensemblesResponse.json();
+        
+        // Convert API data to our expected format with sections/simple types
+        ensembles = ensemblesData.map(e => ({
+            id: e.id,
+            name: e.name,
+            type: 'simple', // API stores as comma-separated, so treat as simple list
+            members: e.performers || []
+        }));
+        
+        updatePageTitle();
+        displayEnsembles();
+    } catch (error) {
+        console.error('Error loading ensembles:', error);
+        showNotification("Error loading ensembles: " + error.message, "danger");
+    }
 }
 
 function updatePageTitle() {
@@ -123,7 +122,7 @@ function displayEnsembles() {
 
 function renderEnsemblePreview(ensemble) {
     if (ensemble.type === 'sectioned') {
-        if (ensemble.sections.length === 0) {
+        if (!ensemble.sections || ensemble.sections.length === 0) {
             return '<p class="has-text-grey is-italic">No sections added yet. Click "Edit Members" to add sections.</p>';
         }
         
@@ -140,7 +139,7 @@ function renderEnsemblePreview(ensemble) {
             </div>
         `;
     } else {
-        if (ensemble.members.length === 0) {
+        if (!ensemble.members || ensemble.members.length === 0) {
             return '<p class="has-text-grey is-italic">No members added yet. Click "Edit Members" to add performers.</p>';
         }
         
@@ -173,17 +172,31 @@ async function handleAddEnsemble(e) {
         return;
     }
     
-    const newEnsemble = {
-        id: Date.now(),
-        name: name,
-        type: type,
-        sections: type === 'sectioned' ? [] : undefined,
-        members: type === 'simple' ? [] : undefined
-    };
-    
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-        ensembles.push(newEnsemble);
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/ensembles/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                performers: [] // Empty array initially
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to create ensemble');
+        }
+        
+        const newEnsemble = await response.json();
+        
+        // Convert API format to our format
+        ensembles.push({
+            id: newEnsemble.id,
+            name: newEnsemble.name,
+            type: type,
+            sections: type === 'sectioned' ? [] : undefined,
+            members: type === 'simple' ? [] : undefined
+        });
+        
         displayEnsembles();
         form.reset();
         showNotification(`Ensemble "${name}" created! Now add members.`, "success");
@@ -191,7 +204,11 @@ async function handleAddEnsemble(e) {
         
         // Automatically open the editor for the new ensemble
         setTimeout(() => editEnsemble(newEnsemble.id), 500);
-    }, 300);
+    } catch (error) {
+        console.error('Error creating ensemble:', error);
+        showNotification("Error creating ensemble: " + error.message, "danger");
+        submitButton.classList.remove("is-loading");
+    }
 }
 
 function editEnsemble(ensembleId) {
@@ -358,18 +375,49 @@ function removeSimpleMember(index) {
     renderSimpleMembers();
 }
 
-function saveEnsemble() {
-    // TODO: Replace with actual API call to save ensemble
-    
-    // Update the ensemble in the main array
-    const index = ensembles.findIndex(e => e.id === currentEnsemble.id);
-    if (index !== -1) {
-        ensembles[index] = currentEnsemble;
+async function saveEnsemble() {
+    try {
+        // Convert current ensemble format to API format
+        let performersArray = [];
+        
+        if (currentEnsemble.type === 'sectioned' && currentEnsemble.sections) {
+            // For sectioned, flatten all sections into performers array with section names
+            currentEnsemble.sections.forEach(section => {
+                section.members.forEach(member => {
+                    performersArray.push(`${section.name}: ${member}`);
+                });
+            });
+        } else if (currentEnsemble.members) {
+            performersArray = currentEnsemble.members;
+        }
+        
+        // API expects performers as an array which it will join with commas
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/ensembles/${currentEnsemble.id}/update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: currentEnsemble.name,
+                performers: performersArray
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save ensemble');
+        }
+        
+        // Update the ensemble in the main array
+        const index = ensembles.findIndex(e => e.id === currentEnsemble.id);
+        if (index !== -1) {
+            ensembles[index] = currentEnsemble;
+        }
+        
+        displayEnsembles();
+        closeEnsembleModal();
+        showNotification(`"${currentEnsemble.name}" saved successfully!`, "success");
+    } catch (error) {
+        console.error('Error saving ensemble:', error);
+        showNotification("Error saving ensemble: " + error.message, "danger");
     }
-    
-    displayEnsembles();
-    closeEnsembleModal();
-    showNotification(`"${currentEnsemble.name}" saved successfully!`, "success");
 }
 
 function closeEnsembleModal() {
@@ -377,7 +425,7 @@ function closeEnsembleModal() {
     currentEnsemble = null;
 }
 
-function deleteEnsemble(ensembleId) {
+async function deleteEnsemble(ensembleId) {
     const ensemble = ensembles.find(e => e.id === ensembleId);
     if (!ensemble) return;
     
@@ -385,13 +433,25 @@ function deleteEnsemble(ensembleId) {
         return;
     }
     
-    // TODO: Replace with actual API call
-    ensembles = ensembles.filter(e => e.id !== ensembleId);
-    displayEnsembles();
-    showNotification(`"${ensemble.name}" deleted`, "info");
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/ensembles/${ensembleId}/delete`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete ensemble');
+        }
+        
+        ensembles = ensembles.filter(e => e.id !== ensembleId);
+        displayEnsembles();
+        showNotification(`"${ensemble.name}" deleted`, "info");
+    } catch (error) {
+        console.error('Error deleting ensemble:', error);
+        showNotification("Error deleting ensemble: " + error.message, "danger");
+    }
 }
 
-function showNotification(message, type = "info") {
+function showNotification(message, type = "info", duration = 4000) {
     const main = document.querySelector("main");
     const notification = document.createElement("div");
     notification.className = `notification is-${type} is-light`;
@@ -400,17 +460,27 @@ function showNotification(message, type = "info") {
         ${message}
     `;
     
+    notification.style.opacity = "0";
+    notification.style.transition = "opacity 0.3s ease";
+    
     main.insertBefore(notification, main.firstChild);
     
+    setTimeout(() => notification.style.opacity = "1", 10);
+    
     notification.querySelector(".delete").addEventListener("click", () => {
-        notification.remove();
+        removeNotification(notification);
     });
     
+    setTimeout(() => removeNotification(notification), duration);
+}
+
+function removeNotification(notification) {
+    notification.style.opacity = "0";
     setTimeout(() => {
-        notification.style.opacity = "0";
-        notification.style.transition = "opacity 0.3s";
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 300);
 }
 
 function updateNavLinks() {

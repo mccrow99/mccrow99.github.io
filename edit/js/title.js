@@ -4,13 +4,13 @@ let concertData = {
     id: null,
     title: "",
     subtitle: "",
-    location: "",
-    price: "",
-    copyright_info: "",
-    additional_notes: "",
+    description: "",
+    director: null,
     cover_image: null,
     performances: []
 };
+
+const base_url = "https://kulbee.pythonanywhere.com";
 
 function getConcertIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
@@ -18,38 +18,32 @@ function getConcertIdFromUrl() {
 }
 
 async function loadConcertData(concertId) {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/concerts/${concertId}`);
-    // concertData = await response.json();
-    
-    // Mock data for demonstration
-    concertData = {
-        id: concertId,
-        title: "Winter Gala Concert",
-        subtitle: "An Evening of Classical Favorites",
-        location: "Grand Concert Hall",
-        price: "$25 General, $15 Students",
-        copyright_info: "All works used with permission.",
-        additional_notes: "Please silence all electronic devices.",
-        cover_image: "sample_cover.jpg",
-        performances: [
-            { id: 1, date: "2025-12-20", time: "7:30 PM" },
-            { id: 2, date: "2025-12-21", time: "7:30 PM" }
-        ]
-    };
-    
-    populateForm();
-    updatePageTitle();
-    displayPerformances();
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}`, { cache: "no-store" });
+        
+        if (!response.ok) {
+            throw new Error('Concert not found');
+        }
+        
+        const data = await response.json();
+        concertData = data;
+        
+        populateForm();
+        updatePageTitle();
+        displayPerformances();
+    } catch (error) {
+        console.error('Error loading concert:', error);
+        showNotification("Error loading concert: " + error.message, "danger");
+    }
 }
 
 function populateForm() {
     document.getElementById('title').value = concertData.title || "";
     document.getElementById('subtitle').value = concertData.subtitle || "";
-    document.getElementById('location').value = concertData.location || "";
-    document.getElementById('price').value = concertData.price || "";
-    document.getElementById('copyright_info').value = concertData.copyright_info || "";
-    document.getElementById('additional_notes').value = concertData.additional_notes || "";
+    document.getElementById('description').value = concertData.description || "";
+    
+    // Note: location, price, copyright_info, additional_notes are stored in Performance model
+    // For now, we'll handle these in the performance section
     
     if (concertData.cover_image) {
         document.getElementById('file-name-span').textContent = concertData.cover_image;
@@ -82,6 +76,7 @@ function displayPerformances() {
         li.className = 'list-item level is-mobile py-3';
         
         const formattedDate = formatDate(perf.date);
+        const location = perf.location || '';
         
         li.innerHTML = `
             <div class="level-left">
@@ -103,6 +98,16 @@ function displayPerformances() {
                         </span>
                     </span>
                 ` : ''}
+                ${location ? `
+                    <span class="level-item ml-4">
+                        <span class="icon-text">
+                            <span class="icon has-text-success">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </span>
+                            <span class="has-text-grey">${location}</span>
+                        </span>
+                    </span>
+                ` : ''}
             </div>
             <div class="level-right">
                 <button type="button" 
@@ -121,7 +126,7 @@ function displayPerformances() {
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString + 'T00:00:00');
+    const date = new Date(dateString);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
 }
@@ -136,10 +141,7 @@ async function handleDetailsSubmit(e) {
     const formData = {
         title: document.getElementById('title').value.trim(),
         subtitle: document.getElementById('subtitle').value.trim(),
-        location: document.getElementById('location').value.trim(),
-        price: document.getElementById('price').value.trim(),
-        copyright_info: document.getElementById('copyright_info').value.trim(),
-        additional_notes: document.getElementById('additional_notes').value.trim()
+        description: document.getElementById('description').value.trim()
     };
     
     if (!formData.title) {
@@ -148,22 +150,28 @@ async function handleDetailsSubmit(e) {
         return;
     }
     
-    if (!formData.location) {
-        showNotification("Location is required", "danger");
-        submitButton.classList.remove("is-loading");
-        return;
-    }
-    
-    // TODO: Handle file upload
-    // const coverImage = document.getElementById('cover_image').files[0];
-    
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-        concertData = { ...concertData, ...formData };
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertData.id}/update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update concert');
+        }
+        
+        const data = await response.json();
+        concertData = { ...concertData, ...data };
+        
         showNotification("Concert details updated successfully!", "success");
         updatePageTitle();
         submitButton.classList.remove("is-loading");
-    }, 500);
+    } catch (error) {
+        console.error('Error updating concert:', error);
+        showNotification("Error updating concert: " + error.message, "danger");
+        submitButton.classList.remove("is-loading");
+    }
 }
 
 async function handlePerformanceAdd(e) {
@@ -172,9 +180,11 @@ async function handlePerformanceAdd(e) {
     const form = e.target;
     const dateInput = document.getElementById('perf-date');
     const timeInput = document.getElementById('perf-time');
+    const locationInput = document.getElementById('perf-location');
     
     const date = dateInput.value;
     const time = timeInput.value;
+    const location = locationInput ? locationInput.value.trim() : '';
     
     if (!date) {
         showNotification("Please select a date", "warning");
@@ -184,50 +194,89 @@ async function handlePerformanceAdd(e) {
     const submitButton = form.querySelector('button[type="submit"]');
     submitButton.classList.add("is-loading");
     
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-        const newPerf = {
-            id: Math.floor(Math.random() * 10000),
+    try {
+        const perfData = {
             date: date,
-            time: time
+            time: time || null,
+            location: location || null
         };
         
+        const response = await fetch(`${base_url}/api/concerts/${concertData.id}/performances/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(perfData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to add performance');
+        }
+        
+        const newPerf = await response.json();
         concertData.performances.push(newPerf);
         displayPerformances();
         
         dateInput.value = "";
         timeInput.value = "";
+        if (locationInput) locationInput.value = "";
         
         showNotification("Performance date added!", "success");
         submitButton.classList.remove("is-loading");
-    }, 300);
+    } catch (error) {
+        console.error('Error adding performance:', error);
+        showNotification("Error adding performance: " + error.message, "danger");
+        submitButton.classList.remove("is-loading");
+    }
 }
 
-function deletePerformance(perfId) {
+async function deletePerformance(perfId) {
     if (!confirm('Are you sure you want to delete this performance date?')) {
         return;
     }
     
-    // TODO: Replace with actual API call
-    concertData.performances = concertData.performances.filter(p => p.id !== perfId);
-    displayPerformances();
-    showNotification("Performance date deleted", "info");
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertData.id}/performances/${perfId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete performance');
+        }
+        
+        concertData.performances = concertData.performances.filter(p => p.id !== perfId);
+        displayPerformances();
+        showNotification("Performance date deleted", "info");
+    } catch (error) {
+        console.error('Error deleting performance:', error);
+        showNotification("Error deleting performance: " + error.message, "danger");
+    }
 }
 
-function handleDeleteConcert() {
+async function handleDeleteConcert() {
     if (!confirm(`Are you sure you want to delete "${concertData.title}"? This will permanently remove all associated data including ensembles, songs, and crew. This action cannot be undone!`)) {
         return;
     }
     
-    // TODO: Replace with actual API call
-    showNotification("Concert deleted. Redirecting...", "success");
-    
-    setTimeout(() => {
-        window.location.href = "../index.html";
-    }, 1500);
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertData.id}/delete`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete concert');
+        }
+        
+        showNotification("Concert deleted. Redirecting...", "success");
+        
+        setTimeout(() => {
+            window.location.href = "../index.html";
+        }, 1500);
+    } catch (error) {
+        console.error('Error deleting concert:', error);
+        showNotification("Error deleting concert: " + error.message, "danger");
+    }
 }
 
-function showNotification(message, type = "info") {
+function showNotification(message, type = "info", duration = 4000) {
     const main = document.querySelector("main");
     const notification = document.createElement("div");
     notification.className = `notification is-${type} is-light`;
@@ -236,17 +285,27 @@ function showNotification(message, type = "info") {
         ${message}
     `;
     
+    notification.style.opacity = "0";
+    notification.style.transition = "opacity 0.3s ease";
+    
     main.insertBefore(notification, main.firstChild);
     
+    setTimeout(() => notification.style.opacity = "1", 10);
+    
     notification.querySelector(".delete").addEventListener("click", () => {
-        notification.remove();
+        removeNotification(notification);
     });
     
+    setTimeout(() => removeNotification(notification), duration);
+}
+
+function removeNotification(notification) {
+    notification.style.opacity = "0";
     setTimeout(() => {
-        notification.style.opacity = "0";
-        notification.style.transition = "opacity 0.3s";
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 300);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -285,8 +344,8 @@ document.addEventListener("DOMContentLoaded", () => {
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 fileNameSpan.textContent = fileInput.files[0].name;
+                // TODO: Implement file upload to server
             }
         });
     }
 });
-

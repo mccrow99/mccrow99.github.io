@@ -1,118 +1,136 @@
 "use strict";
 
-// This is a template that can be adapted for:
-// - director_sect.js
-// - ensemble.js
-// - crew.js
-// - songs.js
-// - bios.js
-// - acknowledgments.js
-
+const base_url = "https://kulbee.pythonanywhere.com";
 let concertId = null;
 let concertTitle = "";
-let sectionData = {};
+let crewMembers = [];
 
 function getConcertIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
     return params.get('id');
 }
 
-async function loadSectionData(id) {
+async function loadCrewData(id) {
     concertId = id;
     
-    // TODO: Replace with actual API calls
-    // For director notes:
-    // const response = await fetch(`/api/concerts/${id}/director`);
-    
-    // For ensemble:
-    // const response = await fetch(`/api/concerts/${id}/ensembles`);
-    
-    // For crew:
-    // const response = await fetch(`/api/concerts/${id}/crew`);
-    
-    // For songs:
-    // const response = await fetch(`/api/concerts/${id}/songs`);
-    
-    // For bios:
-    // const response = await fetch(`/api/concerts/${id}/bios`);
-    
-    // For acknowledgments:
-    // const response = await fetch(`/api/concerts/${id}/acknowledgments`);
-    
-    // Mock data - adapt based on section
-    sectionData = {
-        concert_title: "Winter Gala Concert",
-        // Section-specific fields would go here
-        content: ""
-    };
-    
-    concertTitle = sectionData.concert_title;
-    updatePageTitle();
-    populateForm();
+    try {
+        const concertResponse = await fetch(`${base_url}/api/concerts/${id}`, { cache: "no-store" });
+        const crewResponse = await fetch(`${base_url}/api/concerts/${id}/crew`, { cache: "no-store" });
+        
+        if (!concertResponse.ok) throw new Error('Failed to load concert');
+        if (!crewResponse.ok) throw new Error('Failed to load crew');
+        
+        const concertData = await concertResponse.json();
+        crewMembers = await crewResponse.json();
+        
+        concertTitle = concertData.title;
+        updatePageTitle();
+        displayCrew();
+    } catch (error) {
+        console.error('Error loading crew:', error);
+        showNotification("Error loading crew: " + error.message, "danger");
+    }
 }
 
 function updatePageTitle() {
     const headerTitle = document.querySelector('.navbar-brand h1');
     if (headerTitle && concertTitle) {
-        // Update based on current page
-        const pageName = getCurrentSectionName();
-        headerTitle.textContent = `Edit ${pageName}: ${concertTitle}`;
+        headerTitle.textContent = `Edit Crew: ${concertTitle}`;
     }
 }
 
-function getCurrentSectionName() {
-    const path = window.location.pathname;
-    if (path.includes('director')) return 'Director Notes';
-    if (path.includes('ensemble')) return 'Ensembles';
-    if (path.includes('crew')) return 'Crew';
-    if (path.includes('songs')) return 'Songs';
-    if (path.includes('bios')) return 'Bios';
-    if (path.includes('acknowledgments')) return 'Acknowledgments';
-    return 'Section';
-}
-
-function populateForm() {
-    // Adapt based on section - example for text content
-    const textarea = document.querySelector('textarea');
-    if (textarea && sectionData.content) {
-        textarea.value = sectionData.content;
+function displayCrew() {
+    const container = document.getElementById('crew-list');
+    
+    if (crewMembers.length === 0) {
+        container.innerHTML = `
+            <div class="notification is-light has-text-centered">
+                <span class="icon is-large has-text-grey-light">
+                    <i class="fas fa-users fa-2x"></i>
+                </span>
+                <p class="mt-3 has-text-grey">No crew members added yet. Add your first member above!</p>
+            </div>
+        `;
+        return;
     }
+    
+    container.innerHTML = crewMembers.map(member => `
+        <div class="card mb-3">
+            <div class="card-content">
+                <div class="level is-mobile">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <div>
+                                <p class="has-text-weight-bold">${member.name}</p>
+                                <p class="is-size-7 has-text-grey">${member.role || 'No role specified'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <button class="button is-small is-danger is-light level-item" onclick="deleteCrew(${member.id})">
+                            <span class="icon"><i class="fas fa-trash"></i></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
-async function handleFormSubmit(e) {
+async function handleAddCrew(e) {
     e.preventDefault();
     
     const form = e.target;
     const submitButton = form.querySelector('button[type="submit"]');
     submitButton.classList.add("is-loading");
-    submitButton.disabled = true;
     
-    // Gather form data - adapt based on section
-    const formData = {};
-    const textareas = form.querySelectorAll('textarea');
-    const inputs = form.querySelectorAll('input[type="text"]');
+    const name = document.getElementById('crew_member_name').value.trim();
+    const role = document.getElementById('crew_member_role').value.trim();
     
-    textareas.forEach(ta => {
-        formData[ta.name] = ta.value.trim();
-    });
-    
-    inputs.forEach(input => {
-        formData[input.name] = input.value.trim();
-    });
-    
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/concerts/${concertId}/section`, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(formData)
-    // });
-    
-    // Simulate API call
-    setTimeout(() => {
-        showNotification("Section updated successfully!", "success");
+    if (!name || !role) {
+        showNotification("Name and role are required", "warning");
         submitButton.classList.remove("is-loading");
-        submitButton.disabled = false;
-    }, 500);
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/crew/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, role })
+        });
+        
+        if (!response.ok) throw new Error('Failed to add crew member');
+        
+        await loadCrewData(concertId);
+        form.reset();
+        showNotification("Crew member added!", "success");
+    } catch (error) {
+        console.error('Error adding crew:', error);
+        showNotification("Error adding crew: " + error.message, "danger");
+    } finally {
+        submitButton.classList.remove("is-loading");
+    }
+}
+
+async function deleteCrew(crewId) {
+    if (!confirm('Are you sure you want to remove this crew member?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${base_url}/api/concerts/${concertId}/crew/${crewId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete crew member');
+        
+        await loadCrewData(concertId);
+        showNotification("Crew member removed", "info");
+    } catch (error) {
+        console.error('Error deleting crew:', error);
+        showNotification("Error deleting crew: " + error.message, "danger");
+    }
 }
 
 function showNotification(message, type = "info") {
@@ -137,7 +155,6 @@ function showNotification(message, type = "info") {
     }, 4000);
 }
 
-// Update navigation links with concert ID
 function updateNavLinks() {
     if (!concertId) return;
     
@@ -145,7 +162,6 @@ function updateNavLinks() {
     navLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (href && href.includes('.html') && !href.includes('?id=')) {
-            // Don't add ID to home link or preview
             if (!href.includes('index.html') && !href.includes('program.html')) {
                 link.setAttribute('href', `${href}?id=${concertId}`);
             } else if (href.includes('program.html')) {
@@ -164,35 +180,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
     
-    loadSectionData(id);
+    loadCrewData(id);
     
-    const form = document.querySelector("form");
+    const form = document.getElementById('add-crew-form');
     if (form) {
-        form.addEventListener("submit", handleFormSubmit);
+        form.addEventListener("submit", handleAddCrew);
     }
     
     updateNavLinks();
-    
-    // Add character counter for textareas
-    document.querySelectorAll('textarea').forEach(textarea => {
-        const maxLength = 2000;
-        textarea.maxLength = maxLength;
-        
-        const helpText = document.createElement("p");
-        helpText.className = "help has-text-right";
-        textarea.parentElement.appendChild(helpText);
-        
-        const updateCounter = () => {
-            const remaining = maxLength - textarea.value.length;
-            helpText.textContent = `${remaining} characters remaining`;
-            if (remaining < 200) {
-                helpText.classList.add("has-text-warning");
-            } else {
-                helpText.classList.remove("has-text-warning");
-            }
-        };
-        
-        textarea.addEventListener("input", updateCounter);
-        updateCounter();
-    });
 });
