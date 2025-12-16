@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Bios - Concert Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="js/bios.js"></script>
+</head>
+<body class="has-navbar-fixed-top has-background-light">
+    <header class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../index.html">
+                <span class="icon is-medium mr-2">
+                    <i class="fas fa-id-card"></i>
+                </span>
+                <h1 class="is-size-5 has-text-white has-text-weight-bold">Edit Bios</h1>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a href="../index.html" class="navbar-item has-text-white-ter">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span>Home</span>
+                </a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link has-text-white-ter">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                        <span>Edit Sections</span>
+                    </a>
+                    <div class="navbar-dropdown">
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-info-circle"></i></span>
+                            <span>Title & Details</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './director_sect.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-user-tie"></i></span>
+                            <span>Director Notes</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './ensemble.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-users"></i></span>
+                            <span>Ensembles</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './crew.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-tools"></i></span>
+                            <span>Crew</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './songs.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-music"></i></span>
+                            <span>Songs</span>
+                        </a>
+                        <a href="#" class="navbar-item is-active" 
+                        onclick="window.location.href = './bios.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-id-card"></i></span>
+                            <span>Bios</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './acknowledgments.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-heart"></i></span>
+                            <span>Acknowledgments</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <a href="../view/program.html" class="button is-success is-light">
+                        <span class="icon"><i class="fas fa-eye"></i></span>
+                        <span>Preview Program</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container is-max-desktop pt-6">
+        <nav class="breadcrumb mt-4" aria-label="breadcrumbs">
+            <ul>
+                <li><a href="../index.html"><span class="icon"><i class="fas fa-home"></i></span><span>Home</span></a></li>
+                <li><a href="#" onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                    <span class="icon"><i class="fas fa-edit"></i></span><span>Edit Concert</span>
+                </a></li>
+                <li class="is-active"><a href="#" aria-current="page">Bios</a></li>
+            </ul>
+        </nav>
+
+        <form method="POST" class="box">
+            <h2 class="title is-4">
+                <span class="icon-text">
+                    <span class="icon has-text-primary"><i class="fas fa-plus-circle"></i></span>
+                    <span>Edit Bios</span>
+                </span>
+            </h2>
+            
+            <div class="columns is-multiline">
+                <div class="column is-half">
+                    <div class="field">
+                        <label for="artist_name" class="label">
+                            Artist/Crew Name
+                            <span class="has-text-danger">*</span>
+                        </label>
+                        <div class="control has-icons-left">
+                            <input type="text" 
+                                   id="artist_name" 
+                                   name="artist_name" 
+                                   class="input" 
+                                   placeholder="e.g., Jane Smith"
+                                   required>
+                            <span class="icon is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-half">
+                    <div class="field">
+                        <label for="artist_name" class="label">
+                            Artist/Crew Role
+                            <span class="has-text-danger">*</span>
+                        </label>
+                        <div class="control has-icons-left">
+                            <input type="text" 
+                                   id="artist_role" 
+                                   name="artist_role" 
+                                   class="input" 
+                                   placeholder="e.g., Stage Manager"
+                                   required>
+                            <span class="icon is-left">
+                                <i class="fas fa-briefcase"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="biography_entry" class="label">
+                    Biography Entry
+                </label>
+                <div class="control">
+                    <textarea id="biography_entry" 
+                              name="biography_entry" 
+                              class="textarea" 
+                              rows="8"
+                              placeholder="Write a brief biography about the artist or crew member..."></textarea>
+                </div>
+            </div>
+
+            <div class="field is-grouped mt-5">
+                <div class="control">
+                    <button type="submit" class="button is-primary">
+                        <span class="icon"><i class="fas fa-save"></i></span>
+                        <span>Add to Program</span>
+                    </button>
+                </div>
+                <div class="control">
+                    <button type="reset" class="button is-light">
+                        <span class="icon"><i class="fas fa-eraser"></i></span>
+                        <span>Clear Form</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Bios List -->
+        <div class="box">
+            <div class="level">
+                <div class="level-left">
+                    <h2 class="title is-4 level-item">
+                        <span class="icon-text">
+                            <span class="icon has-text-info"><i class="fas fa-list"></i></span>
+                            <span>Bios List</span>
+                        </span>
+                    </h2>
+                </div>
+                <div class="level-right">
+                    <p class="level-item has-text-grey">Drag to reorder</p>
+                </div>
+            </div>
+            
+            <div id="bios-list">
+                <!-- Bios will be dynamically added here -->
+                <div class="notification is-light has-text-centered">
+                    <span class="icon is-large has-text-grey-light">
+                        <i class="fas fa-users fa-2x"></i>
+                    </span>
+                    <p class="mt-3 has-text-grey">No bios added yet. Add your first bio above!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-grouped mt-5">
+            <div class="control">
+                <a href="#" class="button is-link is-light" 
+                onclick="window.location.href = './acknowledgments.html?id=' + getConcertIdFromUrl(); return false;">
+                    <span>Next: Acknowledgments</span>
+                    <span class="icon"><i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

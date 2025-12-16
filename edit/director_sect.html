@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Director Notes - Concert Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="js/director_sect.js"></script>
+</head>
+<body class="has-navbar-fixed-top has-background-light">
+    <header class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../index.html">
+                <span class="icon is-medium mr-2">
+                    <i class="fas fa-music"></i>
+                </span>
+                <h1 class="is-size-5 has-text-white has-text-weight-bold">Edit Director Notes</h1>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a href="../index.html" class="navbar-item has-text-white-ter">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span>Home</span>
+                </a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link has-text-white-ter">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                        <span>Edit Sections</span>
+                    </a>
+                    <div class="navbar-dropdown">
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-info-circle"></i></span>
+                            <span>Title & Details</span>
+                        </a>
+                        <a href="#" class="navbar-item is-active" 
+                        onclick="window.location.href = './director_sect.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-user-tie"></i></span>
+                            <span>Director Notes</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './ensemble.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-users"></i></span>
+                            <span>Ensembles</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './crew.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-tools"></i></span>
+                            <span>Crew</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './songs.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-music"></i></span>
+                            <span>Songs</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './bios.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-id-card"></i></span>
+                            <span>Bios</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './acknowledgments.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-heart"></i></span>
+                            <span>Acknowledgments</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <a href="../view/program.html" class="button is-success is-light">
+                        <span class="icon"><i class="fas fa-eye"></i></span>
+                        <span>Preview Program</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container is-max-desktop pt-6">
+        <nav class="breadcrumb mt-4" aria-label="breadcrumbs">
+            <ul>
+                <li><a href="../index.html"><span class="icon"><i class="fas fa-home"></i></span><span>Home</span></a></li>
+                <li><a href="#" onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                    <span class="icon"><i class="fas fa-edit"></i></span><span>Edit Concert</span>
+                </a></li>
+                <li class="is-active"><a href="#" aria-current="page">Director Notes</a></li>
+            </ul>
+        </nav>
+
+        <form method="POST" class="box">
+            <h2 class="title is-4">
+                <span class="icon-text">
+                    <span class="icon has-text-primary"><i class="fas fa-user-tie"></i></span>
+                    <span>Director's Section</span>
+                </span>
+            </h2>
+            <p class="subtitle is-6 mb-5">Add the director's notes and biography for the program</p>
+            
+            <div class="field">
+                <label for="director_name" class="label">
+                    Director's Name
+                    <span class="has-text-danger">*</span>
+                </label>
+                <div class="control has-icons-left">
+                    <input type="text" 
+                           id="director_name" 
+                           name="director_name" 
+                           class="input" 
+                           placeholder="e.g., Dr. Jane Smith"
+                           required>
+                    <span class="icon is-left">
+                        <i class="fas fa-user"></i>
+                    </span>
+                </div>
+                <p class="help">The director's name as it should appear on the program</p>
+            </div>
+
+            <div class="field">
+                <label for="director_notes" class="label">
+                    Director's Notes
+                </label>
+                <div class="control">
+                    <textarea id="director_notes" 
+                              name="director_notes" 
+                              class="textarea" 
+                              rows="8"
+                              placeholder="Welcome message, concert theme, acknowledgments, or any special notes about the performance..."></textarea>
+                </div>
+                <p class="help">These notes will appear at the beginning of the program</p>
+            </div>
+
+            <div class="field">
+                <label for="director_bio" class="label">
+                    Director's Biography
+                </label>
+                <div class="control">
+                    <textarea id="director_bio" 
+                              name="director_bio" 
+                              class="textarea" 
+                              rows="6"
+                              placeholder="Educational background, experience, accomplishments, and any relevant information about the director..."></textarea>
+                </div>
+                <p class="help">A brief biography of the director for the program</p>
+            </div>
+
+            <div class="field is-grouped mt-5">
+                <div class="control">
+                    <button type="submit" class="button is-primary">
+                        <span class="icon"><i class="fas fa-save"></i></span>
+                        <span>Update Director Notes</span>
+                    </button>
+                </div>
+                <div class="control">
+                    <a href="#" class="button is-link is-light" 
+                    onclick="window.location.href = './ensemble.html?id=' + getConcertIdFromUrl(); return false;">
+                        <span>Next: Ensembles</span>
+                        <span class="icon"><i class="fas fa-arrow-right"></i></span>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <div class="box has-background-info-light mt-5">
+            <article class="message is-info">
+                <div class="message-body">
+                    <span class="icon-text mb-2">
+                        <span class="icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </span>
+                        <span><strong>Tips for Director's Notes:</strong></span>
+                    </span>
+                    <ul class="mt-2">
+                        <li>Welcome the audience and set the tone for the concert</li>
+                        <li>Provide context about the selected repertoire</li>
+                        <li>Highlight any special features or guest artists</li>
+                        <li>Keep it concise - aim for 2-3 paragraphs</li>
+                        <li>Thank key supporters if appropriate</li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    </main>
+</body>
+</html>

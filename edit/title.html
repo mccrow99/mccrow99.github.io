@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Concert - Concert Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="js/title.js"></script>
+</head>
+<body class="has-navbar-fixed-top has-background-light">
+    <header class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../index.html">
+                <span class="icon is-medium mr-2">
+                    <i class="fas fa-music"></i>
+                </span>
+                <h1 class="is-size-5 has-text-white has-text-weight-bold">Edit Concert</h1>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a href="../index.html" class="navbar-item has-text-white-ter">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span>Home</span>
+                </a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link has-text-white-ter">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                        <span>Edit Sections</span>
+                    </a>
+                    <div class="navbar-dropdown">
+                        <a href="#" class="navbar-item is-active" 
+                        onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                        <span>Title & Details</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './director_sect.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-user-tie"></i></span>
+                            <span>Director Notes</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './ensemble.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-users"></i></span>
+                            <span>Ensembles</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './crew.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-tools"></i></span>
+                            <span>Crew</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './songs.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-music"></i></span>
+                            <span>Songs</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './bios.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-id-card"></i></span>
+                            <span>Bios</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './acknowledgments.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-heart"></i></span>
+                            <span>Acknowledgments</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <a href="../view/program.html" class="button is-success is-light">
+                        <span class="icon"><i class="fas fa-eye"></i></span>
+                        <span>Preview Program</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container is-max-desktop pt-6">
+        <nav class="breadcrumb mt-4" aria-label="breadcrumbs">
+            <ul>
+                <li><a href="../index.html"><span class="icon"><i class="fas fa-home"></i></span><span>Home</span></a></li>
+                <li><a href="#" onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                    <span class="icon"><i class="fas fa-edit"></i></span><span>Edit Concert</span>
+                </a></li>
+                <li class="is-active"><a href="#" aria-current="page">Title & Details</a></li>
+            </ul>
+        </nav>
+
+        <form id="details-form" method="POST" enctype="multipart/form-data" class="box">
+            <h2 class="title is-4">
+                <span class="icon-text">
+                    <span class="icon has-text-primary"><i class="fas fa-info-circle"></i></span>
+                    <span>Concert Details</span>
+                </span>
+            </h2>
+            
+            <div class="field">
+                <label for="title" class="label">
+                    Concert Title 
+                    <span class="has-text-danger">*</span>
+                </label>
+                <div class="control has-icons-left">
+                    <input type="text" id="title" name="title" required class="input">
+                    <span class="icon is-left"><i class="fas fa-heading"></i></span>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label for="subtitle" class="label">Subtitle</label>
+                <div class="control has-icons-left">
+                    <input type="text" id="subtitle" name="subtitle" class="input" placeholder="Optional subtitle">
+                    <span class="icon is-left"><i class="fas fa-align-left"></i></span>
+                </div>
+                <p class="help">A descriptive tagline for your concert</p>
+            </div>
+
+            <div class="field">
+                <label for="location" class="label">
+                    Venue/Location 
+                    <span class="has-text-danger">*</span>
+                </label>
+                <div class="control has-icons-left">
+                    <input type="text" id="location" name="location" required class="input" placeholder="e.g., Grand Concert Hall">
+                    <span class="icon is-left"><i class="fas fa-map-marker-alt"></i></span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="price" class="label">Admission Price</label>
+                <div class="control has-icons-left">
+                    <input type="text" id="price" name="price" class="input" placeholder="e.g., $10, Free, $25 General / $15 Students">
+                    <span class="icon is-left"><i class="fas fa-ticket-alt"></i></span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="copyright_info" class="label">Copyright/Licensing Information</label>
+                <div class="control">
+                    <textarea id="copyright_info" name="copyright_info" class="textarea" rows="3" placeholder="Copyright and licensing details..."></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="additional_notes" class="label">Additional Notes</label>
+                <div class="control">
+                    <textarea id="additional_notes" name="additional_notes" class="textarea" rows="3" placeholder="Announcements, special instructions, etc."></textarea>
+                </div>
+                <p class="help">These notes will appear on the program (e.g., "Please silence cell phones")</p>
+            </div>
+
+            <div class="field">
+                <label for="cover_image" class="label">Cover Image</label>
+                <div class="control">
+                    <div class="file has-name is-fullwidth">
+                        <label class="file-label">
+                            <input class="file-input" type="file" name="cover_image" id="cover_image" accept="image/*">
+                            <span class="file-cta">
+                                <span class="file-icon">
+                                    <i class="fas fa-upload"></i>
+                                </span>
+                                <span class="file-label">
+                                    Choose a file…
+                                </span>
+                            </span>
+                            <span class="file-name" id="file-name-span">
+                                No file uploaded
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <p class="help">Recommended: High-resolution image (JPG or PNG)</p>
+            </div>
+
+            <div class="field is-grouped mt-5">
+                <div class="control">
+                    <button type="submit" class="button is-primary">
+                        <span class="icon"><i class="fas fa-save"></i></span>
+                        <span>Update Details</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <section class="box mt-5">
+            <h2 class="title is-4">
+                <span class="icon-text">
+                    <span class="icon has-text-info"><i class="fas fa-calendar-plus"></i></span>
+                    <span>Add Performance Date</span>
+                </span>
+            </h2>
+            <form id="performance-form" method="POST">
+                <div class="field is-grouped">
+                    <div class="control is-expanded">
+                        <label for="perf-date" class="label">Date <span class="has-text-danger">*</span></label>
+                        <input type="date" id="perf-date" name="date" required class="input">
+                    </div>
+                    <div class="control is-expanded">
+                        <label for="perf-time" class="label">Time (Optional)</label>
+                        <input type="text" id="perf-time" name="time" placeholder="e.g., 7:30 PM" class="input">
+                    </div>
+                    <div class="control" style="align-self: flex-end;">
+                        <button type="submit" class="button is-info">
+                            <span class="icon"><i class="fas fa-plus"></i></span>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <section class="box mt-5">
+            <h2 class="title is-4">
+                <span class="icon-text">
+                    <span class="icon has-text-success"><i class="fas fa-calendar-check"></i></span>
+                    <span>Performance Dates</span>
+                </span>
+            </h2>
+            <div id="performances-list">
+                <p class="has-text-grey has-text-centered py-4">Loading...</p>
+            </div>
+        </section>
+
+        <section class="box has-background-danger-light mt-6">
+            <h2 class="title is-4 has-text-danger">
+                <span class="icon-text">
+                    <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+                    <span>Danger Zone</span>
+                </span>
+            </h2>
+            <p class="subtitle is-6 has-text-danger mb-4">
+                Deleting this concert will permanently remove all associated data including ensembles, crew, songs, bios, and acknowledgments.
+            </p>
+            <button id="delete-concert-btn" type="button" class="button is-danger is-outlined">
+                <span class="icon"><i class="fas fa-trash"></i></span>
+                <span>Delete Concert</span>
+            </button>
+        </section>
+    </main>
+</body>
+</html>

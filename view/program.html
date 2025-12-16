@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concert Program</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="program.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const concertId = getConcertIdFromUrl();
+        loadConcertData(concertId || 'mock'); // or a fixed id while testing
+    });
+    </script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .playbill {
+                width: 100%;
+                padding: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            body {
+                background: white !important;
+            }
+            .box, .section {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+        
+        .playbill {
+            background: white;
+        }
+        
+        .playbill-header {
+            padding: 2rem 1rem;
+        }
+    </style>
+</head>
+<body class="has-background-light">
+    <!-- Navigation (no-print) -->
+    <nav class="navbar is-primary no-print" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../index.html">
+                <span class="icon is-medium mr-2">
+                    <i class="fas fa-music"></i>
+                </span>
+                <span class="has-text-weight-bold">Concert Planner</span>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-end">
+                <a href="../index.html" class="navbar-item has-text-white">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span>Home</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container is-max-desktop p-5 playbill">
+        <!-- Cover Page -->
+        <div class="content has-text-centered playbill-header">
+            <p id="concert-subtitle" class="is-size-5 has-text-weight-light playbill-subtitle" style="display: none;">Concert Subtitle</p>
+            <h1 id="concert-title" class="title is-1 playbill-title">Concert Title</h1>
+            <p id="director-name" class="is-size-5 has-text-weight-light playbill-subtitle">Director Name, Director</p>
+
+            <div id="cover-section" class="mt-5">
+                <!-- Cover image will be inserted here -->
+            </div>
+            
+            <div class="my-5 playbill-info">
+                <p class="has-text-weight-bold mb-2">Performances:</p>
+                <ul id="performances-list" style="list-style: none; padding: 0;">
+                    <!-- Performances will be inserted here -->
+                </ul>
+                
+                <div id="admission-info" class="mt-3">
+                    <!-- Admission price will be inserted here -->
+                </div>
+            </div>
+
+            <div id="announcements" class="has-text-centered my-4">
+                <!-- Announcements will be inserted here -->
+            </div>
+
+            <p id="sponsors" class="has-text-centered mt-4">
+                <!-- Sponsors will be inserted here -->
+            </p>
+        </div>
+
+        <!-- Ensembles & Crew -->
+        <section class="section page-break">
+            <div id="ensembles-container">
+                <!-- Ensembles will be dynamically inserted here -->
+            </div>
+            
+            <h3 class="title is-4 has-text-centered mt-6 mb-4">Concert Crew</h3>
+            <div id="crew-container" class="columns is-multiline">
+                <!-- Crew will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Director's Notes -->
+        <section class="section page-break">
+            <h2 class="title is-3 has-text-centered mb-5">Director's Notes</h2>
+            <div id="director-notes-content" class="content">
+                <!-- Director's notes will be inserted here -->
+            </div>
+            
+            <h3 id="director-bio-title" class="title is-4 has-text-centered mt-6 mb-4">About the Director</h3>
+            <div id="director-bio-content" class="content">
+                <!-- Director's bio will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Songs/Repertoire -->
+        <section class="section page-break">
+            <h2 class="title is-3 has-text-centered mb-5">Program</h2>
+            <div id="songs-container" class="columns is-multiline">
+                <!-- Songs will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Bios -->
+        <section class="section page-break">
+            <h2 class="title is-3 has-text-centered mb-5">Artist Biographies</h2>
+            <div id="bios-container" class="columns is-multiline">
+                <!-- Bios will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Acknowledgments -->
+        <section class="section page-break">
+            <h2 class="title is-3 has-text-centered mb-5">Special Thanks to...</h2>
+            <div id="acknowledgments-content" class="content">
+                <!-- Acknowledgments will be inserted here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Action Buttons (no-print) -->
+    <div class="has-text-centered p-6 no-print">
+        <div class="buttons is-centered">
+            <button onclick="window.print()" class="button is-primary is-medium">
+                <span class="icon"><i class="fas fa-print"></i></span>
+                <span>Print Program</span>
+            </button>
+            <a href="../index.html" class="button is-link is-light is-medium">
+                <span class="icon"><i class="fas fa-home"></i></span>
+                <span>Back to Home</span>
+            </a>
+            <a href="#" class="button is-info is-light is-medium"
+            onclick="window.location.href = '../edit/title.html?id=' + getConcertIdFromUrl(); return false;">
+                <span class="icon"><i class="fas fa-edit"></i></span>
+                <span>Edit Concert</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

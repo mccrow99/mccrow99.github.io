@@ -1,106 +1,40 @@
 <!DOCTYPE html>
-<html lang="">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jokes API</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('img', filename='smile.png') }}">
-    <script type="text/javascript" defer src=main.js></script>
-    <link rel="stylesheet" href="site.css">
+    <title>Concert Planner</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('img', filename='logo.jpg') }}">
+    <script type="text/javascript" defer src=js/main.js></script>
+    <link rel="stylesheet" href="static/site.css">
 </head>
 
-
-<body class="has-background-light">
-    <header class="section">
-        <div class="container">
-            <h1 class="title is-size-2 has-text-centered mb-4">
-                Pick the language, the category, and the number of jokes to hear
-            </h1>
+<body class="has-background-light has-navbar-fixed-top">
+    <header class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <h1 class="navbar-item is-size-4 has-text-white has-text-weight-bold">Concert Planner</h1>
         </div>
     </header>
 
-    <main class="section">
-        <div class="container">
-            <div id="form-container" class="box has-shadow p-5">
-                <form method="post" action="/">
-                    <div class="columns is-variable is-5">
-                        <div class="column is-one-quarter">
-                            <div id="fieldLanguage">
-                                <label class="label is-size-5 has-text-weight-semibold">Language</label>
-                                <div class="control">
-                                    <div class="select is-fullwidth is-info">
-                                        <select name="language" id="selLang">
-                                            <!-- TODO: Populate with the language options -->
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="column is-one-quarter">
-                            <div id="fieldCategory">
-                                <label class="label is-size-5 has-text-weight-semibold">Category</label>
-                                <div class="control">
-                                    <div class="select is-fullwidth is-info">
-                                        <select name="category" id="selCat">
-                                            <option value="any">Any</option>
-                                            <option value="neutral">Neutral</option>
-                                            <option value="chuck">Chuck</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="column is-one-quarter">
-                            <div id="fieldNumber">
-                                <label class="label is-size-5 has-text-weight-semibold">Number</label>
-                                <div class="control">
-                                    <div class="select is-fullwidth is-info">
-                                        <select name="number" id="selNum">
-                                            <!-- TODO: Populate with the numbers -->
-                                            <option value="0">All</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                            <option value="9">9</option>
-                                            <option value="10">10</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="column is-one-quarter">
-                            <div id="fieldNumber">
-                                <label class="label is-size-5 has-text-weight-semibold">Specific Joke ID</label>
-                                <div class="control">
-                                    <input id="jokeId" class="input" type="number">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <button class="button is-primary is-fullwidth is-medium has-text-weight-semibold" type="submit" id="btnAmuse">
-                            Amuse me
-                        </button>
-                    </div>
-                </form>
+    <main class="container is-max-desktop pt-6">
+        <section class="section">
+            <div class="level">
+                <h2 class="title is-2 level-left">Concerts</h2>
+                <a href="./edit/create.html" class="button is-primary level-right">+ New Concert</a>
             </div>
-
-            <div class="box mt-6 has-shadow">
-                <div id="jokes" class="p-4">
-                    <!-- TODO: Add jokes here -->
-                </div>
+            <div id="concerts-container">
+                <!-- Concert cards will be populated here, or it will show a message if there are no concerts -->
+                <div class="card"></div>
             </div>
-        </div>
+                
+        </section>
+
+        <section class="section pt-0">
+            <!-- Place user how-to guide here -->
+             how to use guide
+        </section>
     </main>
+
 </body>
+
 </html>

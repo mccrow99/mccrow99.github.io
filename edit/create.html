@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Concert - Concert Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="js/create.js"></script>
+</head>
+<body class="has-navbar-fixed-top">
+    <header class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../index.html">
+                <span class="icon is-medium mr-2">
+                    <i class="fas fa-music"></i>
+                </span>
+                <h1 class="is-size-5 has-text-white has-text-weight-bold">Concert Planner</h1>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-end">
+                <a href="../index.html" class="navbar-item has-text-white">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span>Home</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container is-max-desktop pt-6">
+        <div class="section">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="../index.html"><span class="icon is-small"><i class="fas fa-home"></i></span><span>Home</span></a></li>
+                    <li class="is-active"><a href="#" aria-current="page"><span class="icon is-small"><i class="fas fa-plus"></i></span><span>New Concert</span></a></li>
+                </ul>
+            </nav>
+
+            <form method="POST" class="box">
+                <h2 class="title is-3">
+                    <span class="icon-text">
+                        <span class="icon has-text-primary">
+                            <i class="fas fa-calendar-plus"></i>
+                        </span>
+                        <span>Create a New Concert</span>
+                    </span>
+                </h2>
+                <p class="subtitle is-6 mb-5">Start by giving your concert a title. You can add more details after creation.</p>
+                
+                <div class="field">
+                    <label for="title" class="label">
+                        Concert Title 
+                        <span class="has-text-danger">*</span>
+                    </label>
+                    <div class="control has-icons-left">
+                        <input type="text" 
+                               id="title" 
+                               name="title" 
+                               class="input is-medium" 
+                               placeholder="e.g., Winter Gala Concert, Spring Symphony..."
+                               required>
+                        <span class="icon is-left">
+                            <i class="fas fa-heading"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field is-grouped mt-5">
+                    <div class="control">
+                        <button type="submit" class="button is-primary is-medium" id="submitButton">
+                            <span class="icon">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <span>Create Concert</span>
+                        </button>
+                    </div>
+                    <div class="control">
+                        <a href="../index.html" class="button is-light is-medium">
+                            <span class="icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            <span>Cancel</span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <div class="box has-background-info-light">
+                <article class="message is-info">
+                    <div class="message-body">
+                        <span class="icon-text">
+                            <span class="icon">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                            <span><strong>What happens next?</strong></span>
+                        </span>
+                        <p class="mt-2">
+                            After creating your concert, you'll be able to add:
+                        </p>
+                        <ul class="mt-2">
+                            <li>• Performance dates and venue information</li>
+                            <li>• Director notes and biography</li>
+                            <li>• Ensemble members and crew</li>
+                            <li>• Song repertoire with composer details</li>
+                            <li>• Performer biographies</li>
+                            <li>• Acknowledgments and sponsors</li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

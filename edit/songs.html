@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Songs - Concert Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="js/songs.js"></script>
+</head>
+<body class="has-navbar-fixed-top has-background-light">
+    <header class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../index.html">
+                <span class="icon is-medium mr-2">
+                    <i class="fas fa-music"></i>
+                </span>
+                <h1 class="is-size-5 has-text-white has-text-weight-bold">Edit Songs</h1>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a href="../index.html" class="navbar-item has-text-white-ter">
+                    <span class="icon"><i class="fas fa-home"></i></span>
+                    <span>Home</span>
+                </a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link has-text-white-ter">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                        <span>Edit Sections</span>
+                    </a>
+                    <div class="navbar-dropdown">
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-info-circle"></i></span>
+                            <span>Title & Details</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './director_sect.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-user-tie"></i></span>
+                            <span>Director Notes</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './ensemble.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-users"></i></span>
+                            <span>Ensembles</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './crew.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-tools"></i></span>
+                            <span>Crew</span>
+                        </a>
+                        <a href="#" class="navbar-item is-active" 
+                        onclick="window.location.href = './songs.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-music"></i></span>
+                            <span>Songs</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './bios.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-id-card"></i></span>
+                            <span>Bios</span>
+                        </a>
+                        <a href="#" class="navbar-item" 
+                        onclick="window.location.href = './acknowledgments.html?id=' + getConcertIdFromUrl(); return false;">
+                            <span class="icon"><i class="fas fa-heart"></i></span>
+                            <span>Acknowledgments</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <a href="../view/program.html" class="button is-success is-light">
+                        <span class="icon"><i class="fas fa-eye"></i></span>
+                        <span>Preview Program</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container is-max-desktop pt-6">
+        <nav class="breadcrumb mt-4" aria-label="breadcrumbs">
+            <ul>
+                <li><a href="../index.html"><span class="icon"><i class="fas fa-home"></i></span><span>Home</span></a></li>
+                <li><a href="#" onclick="window.location.href = './title.html?id=' + getConcertIdFromUrl(); return false;">
+                    <span class="icon"><i class="fas fa-edit"></i></span><span>Edit Concert</span>
+                </a></li>
+                <li class="is-active"><a href="#" aria-current="page">Songs</a></li>
+            </ul>
+        </nav>
+
+        <!-- Add Song Form -->
+        <div class="box">
+            <h2 class="title is-4">
+                <span class="icon-text">
+                    <span class="icon has-text-primary"><i class="fas fa-plus-circle"></i></span>
+                    <span>Add Song/Piece</span>
+                </span>
+            </h2>
+            
+            <form id="add-song-form">
+                <div class="columns is-multiline">
+                    <div class="column is-half">
+                        <div class="field">
+                            <label for="song_title" class="label">
+                                Song/Piece Title
+                                <span class="has-text-danger">*</span>
+                            </label>
+                            <div class="control has-icons-left">
+                                <input type="text" 
+                                       id="song_title" 
+                                       name="title" 
+                                       class="input" 
+                                       placeholder="e.g., Symphony No. 5"
+                                       required>
+                                <span class="icon is-left">
+                                    <i class="fas fa-music"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-half">
+                        <div class="field">
+                            <label for="composer" class="label">
+                                Composer
+                                <span class="has-text-danger">*</span>
+                            </label>
+                            <div class="control has-icons-left">
+                                <input type="text" 
+                                       id="composer" 
+                                       name="composer" 
+                                       class="input" 
+                                       placeholder="e.g., Ludwig van Beethoven"
+                                       required>
+                                <span class="icon is-left">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-one-third">
+                        <div class="field">
+                            <label for="birth_year" class="label">Birth Year</label>
+                            <div class="control has-icons-left">
+                                <input type="text" 
+                                       id="birth_year" 
+                                       name="birth_year" 
+                                       class="input" 
+                                       placeholder="e.g., 1770">
+                                <span class="icon is-left">
+                                    <i class="fas fa-calendar"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-one-third">
+                        <div class="field">
+                            <label for="performing_ensemble" class="label">Performing Ensemble</label>
+                            <div class="control has-icons-left">
+                                <input type="text" 
+                                       id="performing_ensemble" 
+                                       name="ensemble" 
+                                       class="input" 
+                                       placeholder="e.g., Orchestra">
+                                <span class="icon is-left">
+                                    <i class="fas fa-users"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-one-third">
+                        <div class="field">
+                            <label for="soloists" class="label">Featured Soloists</label>
+                            <div class="control has-icons-left">
+                                <input type="text" 
+                                       id="soloists" 
+                                       name="soloists" 
+                                       class="input" 
+                                       placeholder="Optional">
+                                <span class="icon is-left">
+                                    <i class="fas fa-star"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-full">
+                        <div class="field">
+                            <label for="song_info" class="label">Program Notes</label>
+                            <div class="control">
+                                <textarea id="song_info" 
+                                          name="info" 
+                                          class="textarea" 
+                                          rows="3"
+                                          placeholder="Brief description or historical context about this piece..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-full">
+                        <div class="field">
+                            <label for="lyrics" class="label">Lyrics/Text</label>
+                            <div class="control">
+                                <textarea id="lyrics" 
+                                          name="lyrics" 
+                                          class="textarea" 
+                                          rows="4"
+                                          placeholder="Optional: Include lyrics or sung text if applicable..."></textarea>
+                            </div>
+                            <p class="help">For songs with text, include the lyrics here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-grouped mt-4">
+                    <div class="control">
+                        <button type="submit" class="button is-primary">
+                            <span class="icon"><i class="fas fa-plus"></i></span>
+                            <span>Add to Program</span>
+                        </button>
+                    </div>
+                    <div class="control">
+                        <button type="reset" class="button is-light">
+                            <span class="icon"><i class="fas fa-eraser"></i></span>
+                            <span>Clear Form</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Songs List -->
+        <div class="box">
+            <div class="level">
+                <div class="level-left">
+                    <h2 class="title is-4 level-item">
+                        <span class="icon-text">
+                            <span class="icon has-text-info"><i class="fas fa-list"></i></span>
+                            <span>Program Order</span>
+                        </span>
+                    </h2>
+                </div>
+                <div class="level-right">
+                    <p class="level-item has-text-grey">Drag to reorder</p>
+                </div>
+            </div>
+            
+            <div id="songs-list">
+                <!-- Songs will be dynamically added here -->
+                <div class="notification is-light has-text-centered">
+                    <span class="icon is-large has-text-grey-light">
+                        <i class="fas fa-music fa-2x"></i>
+                    </span>
+                    <p class="mt-3 has-text-grey">No songs added yet. Add your first piece above!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intermission Settings -->
+        <div class="box">
+            <h2 class="title is-5">
+                <span class="icon-text">
+                    <span class="icon has-text-warning"><i class="fas fa-coffee"></i></span>
+                    <span>Intermission Settings</span>
+                </span>
+            </h2>
+            
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Intermission After</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <div class="select">
+                                <select id="intermission_after">
+                                    <option value="">No intermission</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="help">Select which song the intermission follows</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Duration (minutes)</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <input type="number" 
+                                   id="intermission_duration" 
+                                   class="input" 
+                                   value="15" 
+                                   min="5" 
+                                   max="30"
+                                   style="max-width: 150px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="save-intermission" class="button is-info is-light">
+                <span class="icon"><i class="fas fa-save"></i></span>
+                <span>Save Intermission Settings</span>
+            </button>
+        </div>
+
+        <div class="field is-grouped mt-5">
+            <div class="control">
+                <a href="#" class="button is-link is-light" 
+                onclick="window.location.href = './bios.html?id=' + getConcertIdFromUrl(); return false;">
+                    <span>Next: Bios</span>
+                    <span class="icon"><i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
