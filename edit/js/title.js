@@ -4,7 +4,6 @@ let concertData = {
     id: null,
     title: "",
     subtitle: "",
-    description: "",
     director: null,
     cover_image: null,
     performances: []
@@ -40,7 +39,7 @@ async function loadConcertData(concertId) {
 function populateForm() {
     document.getElementById('title').value = concertData.title || "";
     document.getElementById('subtitle').value = concertData.subtitle || "";
-    document.getElementById('description').value = concertData.description || "";
+
     
     // Note: location, price, copyright_info, additional_notes are stored in Performance model
     // For now, we'll handle these in the performance section
@@ -140,8 +139,7 @@ async function handleDetailsSubmit(e) {
     
     const formData = {
         title: document.getElementById('title').value.trim(),
-        subtitle: document.getElementById('subtitle').value.trim(),
-        description: document.getElementById('description').value.trim()
+        subtitle: document.getElementById('subtitle').value.trim()
     };
     
     if (!formData.title) {
